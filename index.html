@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>팡팡! 어린이 영어 발음 놀이터</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nunito:wght@700;900&display=swap');
+
+    :root {
+      --card-bg: #FFFFFF;
+      --primary: #FF6B6B;
+      --secondary: #4ECDC4;
+      --accent: #FFE66D;
+      --purple: #845EC2;
+      --text-dark: #2D3436;
+      --text-muted: #636E72;
+      --success: #00B894;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Jua', 'Nunito', sans-serif;
+      background: linear-gradient(180deg, #A8E6CF 0%, #DCEDC1 50%, #FFD3B6 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      color: var(--text-dark);
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 560px;
+      background: var(--card-bg);
+      border-radius: 32px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+      padding: 24px;
+      border: 6px solid #FFFFFF;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 상단 헤더 및 별점 */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .app-title {
+      font-size: 1.5rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .star-badge {
+      background: #FFF3CD;
+      border: 3px solid #FFD43B;
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: 1.25rem;
+      color: #E67700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 0 #FFD43B;
+    }
+
+    /* 2단계 선택 탭 */
+    .level-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .level-btn {
+      font-family: 'Jua', sans-serif;
+      border: none;
+      border-radius: 18px;
+      padding: 12px 10px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      background: #F1F3F5;
+      color: var(--text-muted);
+      transition: all 0.15s ease;
+      box-shadow: 0 4px 0 #DEE2E6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .level-btn span.sub {
+      font-size: 0.85rem;
+      opacity: 0.85;
+    }
+
+    .level-btn.active {
+      background: var(--secondary);
+      color: #FFFFFF;
+      box-shadow: 0 4px 0 #2B8A83;
+      transform: translateY(-2px);
+    }
+
+    .level-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #DEE2E6;
+    }
+
+    /* 진행률 표시 */
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 14px;
+      background: #E9ECEF;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #FF9A9E, #FF6B6B);
+      width: 10%;
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      font-size: 1rem;
+      color: var(--text-muted);
+      min-width: 56px;
+      text-align: right;
+    }
+
+    /* 메인 학습 카드 */
+    .flashcard {
+      background: #F8F9FA;
+      border: 4px dashed #CED4DA;
+      border-radius: 26px;
+      padding: 24px 16px;
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+      transition: all 0.25s ease;
+    }
+
+    .flashcard.correct-card {
+      background: #E6FCF5;
+      border-color: var(--success);
+      border-style: solid;
+    }
+
+    .emoji-display {
+      font-size: 4.8rem;
+      line-height: 1.1;
+      margin-bottom: 12px;
+      display: inline-block;
+      animation: float 2.8s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .english-text {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: 2.3rem;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+      word-break: keep-all;
+    }
+
+    .english-text.sentence-mode {
+      font-size: 1.65rem;
+    }
+
+    .phonetic-hint {
+      display: inline-block;
+      background: #FFF0F6;
+      color: #D6336C;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+
+    .korean-meaning {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+    }
+
+    /* 듣기 & 말하기 버튼 영역 */
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .action-btn {
+      font-family: 'Jua', sans-serif;
+      border: none;
+      border-radius: 22px;
+      padding: 16px 12px;
+      font-size: 1.3rem;
+      cursor: pointer;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .action-btn span.icon {
+      font-size: 2rem;
+    }
+
+    .action-btn small {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+
+    .btn-listen {
+      background: #4DABF7;
+      box-shadow: 0 6px 0 #1C7ED6;
+    }
+
+    .btn-listen:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #1C7ED6;
+    }
+
+    .btn-slow {
+      grid-column: span 2;
+      background: #9775FA;
+      box-shadow: 0 5px 0 #6741D9;
+      flex-direction: row;
+      padding: 10px 14px;
+      font-size: 1.05rem;
+      gap: 8px;
+    }
+
+    .btn-slow:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #6741D9;
+    }
+
+    .btn-speak {
+      background: var(--primary);
+      box-shadow: 0 6px 0 #C92A2A;
+    }
+
+    .btn-speak:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #C92A2A;
+    }
+
+    .btn-speak.listening {
+      background: #FF922B;
+      box-shadow: 0 6px 0 #D9480F;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+      100% { transform: scale(1); }
+    }
+
+    /* 피드백 영역 */
+    .feedback-box {
+      min-height: 76px;
+      background: #FFF9DB;
+      border-radius: 20px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      margin-bottom: 18px;
+      border: 2px solid #FFE066;
+    }
+
+    .feedback-main {
+      font-size: 1.25rem;
+      color: var(--text-dark);
+    }
+
+    .feedback-sub {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* 이전 / 다음 내비게이션 */
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      font-family: 'Jua', sans-serif;
+      flex: 1;
+      padding: 12px;
+      border-radius: 16px;
+      border: 3px solid #DEE2E6;
+      background: #FFFFFF;
+      font-size: 1.15rem;
+      color: var(--text-dark);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .nav-btn:hover {
+      background: #F8F9FA;
+    }
+
+    .nav-btn.next-highlight {
+      background: var(--success);
+      border-color: #087F5B;
+      color: white;
+      animation: bounce 0.8s infinite alternate;
+    }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-3px); }
+    }
+
+    /* 브라우저 미지원 안내 */
+    .browser-notice {
+      display: none;
+      background: #FFE3E3;
+      color: #C92A2A;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+
+    /* 폭죽/별 이펙트 */
+    .celebration {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .celebration.show {
+      opacity: 1;
+      animation: popCelebrate 0.9s ease forwards;
+    }
+
+    @keyframes popCelebrate {
+      0% { transform: scale(0.4); opacity: 0; }
+      50% { transform: scale(1.25); opacity: 1; }
+      100% { transform: scale(1); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="celebration" id="celebration">🎉⭐👏</div>
+
+  <div class="app-container">
+    <!-- 상단 타이틀 & 별 개수 -->
+    <div class="header">
+      <div class="app-title">🐣 팡팡! 영어 발음</div>
+      <div class="star-badge">⭐ <span id="starCount">0</span>개</div>
+    </div>
+
+    <!-- 브라우저 음성인식 안내 -->
+    <div class="browser-notice" id="browserNotice">
+      ⚠️ 이 브라우저는 마이크 음성 인식을 지원하지 않아요. 크롬(Chrome) 또는 엣지(Edge)에서 열어주세요!
+    </div>
+
+    <!-- 2단계 선택 버튼 -->
+    <div class="level-tabs">
+      <button class="level-btn active" data-level="0" onclick="selectLevel(0)">
+        1단계: 단어 학습
+        <span class="sub">10개 기초 단어</span>
+      </button>
+      <button class="level-btn" data-level="1" onclick="selectLevel(1)">
+        2단계: 문장 연습
+        <span class="sub">단어로 만든 10개 문장</span>
+      </button>
+    </div>
+
+    <!-- 진행 상태 -->
+    <div class="progress-wrap">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-text" id="progressText">1 / 10</div>
+    </div>
+
+    <!-- 학습 카드 -->
+    <div class="flashcard" id="flashcard">
+      <div class="emoji-display" id="emojiDisplay">🍎</div>
+      <div class="english-text" id="englishText">Apple</div>
+      <div class="phonetic-hint" id="phoneticHint">애플</div>
+      <div class="korean-meaning" id="koreanMeaning">사과</div>
+    </div>
+
+    <!-- 듣기 / 말하기 버튼 -->
+    <div class="controls">
+      <button class="action-btn btn-listen" onclick="speakWord(0.95)">
+        <span class="icon">🔊</span>
+        <span>잘 들어봐요</span>
+        <small>원어민 발음</small>
+      </button>
+
+      <button class="action-btn btn-speak" id="speakBtn" onclick="startListening()">
+        <span class="icon">🎤</span>
+        <span id="speakBtnText">따라 말하기</span>
+        <small id="speakBtnSub">누르고 말해요</small>
+      </button>
+
+      <button class="action-btn btn-slow" onclick="speakWord(0.6)">
+        🐢 천천히 또박또박 듣기
+      </button>
+    </div>
+
+    <!-- 결과 피드백 -->
+    <div class="feedback-box" id="feedbackBox">
+      <div class="feedback-main" id="feedbackMain">먼저 🔊 버튼을 눌러 소리를 들어보세요!</div>
+      <div class="feedback-sub" id="feedbackSub">그다음 🎤 버튼을 누르고 큰 소리로 따라 해봐요.</div>
+    </div>
+
+    <!-- 이전 / 다음 -->
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevItem()">⬅️ 이전</button>
+      <button class="nav-btn" id="nextBtn" onclick="nextItem()">다음 ➡️</button>
+    </div>
+  </div>
+
+  <script>
+    // 1단계: 기초 단어 10개 / 2단계: 1단계 단어를 활용한 문장 10개
+    const curriculum = [
+      // 1단계: 단어 학습 (10개)
+      [
+        { emoji: "🍎", en: "Apple", koSound: "애플", meaning: "사과" },
+        { emoji: "🐶", en: "Dog", koSound: "도그", meaning: "강아지" },
+        { emoji: "🐱", en: "Cat", koSound: "캣", meaning: "고양이" },
+        { emoji: "🍌", en: "Banana", koSound: "버내너", meaning: "바나나" },
+        { emoji: "🦁", en: "Lion", koSound: "라이언", meaning: "사자" },
+        { emoji: "🚗", en: "Car", koSound: "카-", meaning: "자동차" },
+        { emoji: "🐦", en: "Bird", koSound: "버드", meaning: "새" },
+        { emoji: "🐟", en: "Fish", koSound: "피쉬", meaning: "물고기" },
+        { emoji: "🥛", en: "Milk", koSound: "밀크", meaning: "우유" },
+        { emoji: "📘", en: "Book", koSound: "북", meaning: "책" }
+      ],
+      // 2단계: 문장 연습 (1단계 단어 활용 10개)
+      [
+        { emoji: "🍎", en: "I like an apple.", koSound: "아이 라이크 언 애플.", meaning: "나는 사과를 좋아해요. (단어: apple)" },
+        { emoji: "🐶", en: "I have a dog.", koSound: "아이 해브 어 도그.", meaning: "나는 강아지가 있어요. (단어: dog)" },
+        { emoji: "🐱", en: "This is a cat.", koSound: "디스 이즈 어 캣.", meaning: "이것은 고양이예요. (단어: cat)" },
+        { emoji: "🍌", en: "I eat a banana.", koSound: "아이 잇 어 버내너.", meaning: "나는 바나나를 먹어요. (단어: banana)" },
+        { emoji: "🦁", en: "Look at the lion.", koSound: "룩 앳 더 라이언.", meaning: "사자를 봐요. (단어: lion)" },
+        { emoji: "🚗", en: "I see a car.", koSound: "아이 씨 어 카-.", meaning: "나는 자동차를 봐요. (단어: car)" },
+        { emoji: "🐦", en: "The bird can fly.", koSound: "더 버드 캔 플라이.", meaning: "새는 날 수 있어요. (단어: bird)" },
+        { emoji: "🐟", en: "The fish can swim.", koSound: "더 피쉬 캔 스윔.", meaning: "물고기는 헤엄칠 수 있어요. (단어: fish)" },
+        { emoji: "🥛", en: "I drink milk.", koSound: "아이 드링크 밀크.", meaning: "나는 우유를 마셔요. (단어: milk)" },
+        { emoji: "📘", en: "I read a book.", koSound: "아이 리드 어 북.", meaning: "나는 책을 읽어요. (단어: book)" }
+      ]
+    ];
+
+    let currentLevel = 0;
+    let currentIndex = 0;
+    let stars = 0;
+    let completedSet = new Set();
+    let isListening = false;
+    let recognition = null;
+
+    // Web Speech API (음성 인식) 초기화
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 3;
+
+      recognition.onstart = () => {
+        isListening = true;
+        const btn = document.getElementById('speakBtn');
+        btn.classList.add('listening');
+        document.getElementById('speakBtnText').textContent = '듣고 있어요...';
+        document.getElementById('speakBtnSub').textContent = '지금 말해보세요!';
+        setFeedback('👂 귀를 기울이고 있어요!', '또박또박 큰 소리로 말해보세요.');
+      };
+
+      recognition.onresult = (event) => {
+        const results = Array.from(event.results[0]).map(r => r.transcript);
+        evaluateSpeech(results);
+      };
+
+      recognition.onerror = (event) => {
+        resetSpeakButton();
+        if (event.error === 'no-speech') {
+          setFeedback('😅 목소리가 안 들렸어요!', '마이크에 조금 더 가까이 대고 다시 말해보세요.');
+        } else if (event.error === 'not-allowed') {
+          setFeedback('🔒 마이크 권한이 필요해요!', '브라우저 주소창 왼쪽에서 마이크를 허용해주세요.');
+        } else {
+          setFeedback('🔄 다시 한 번 해볼까요?', '🎤 버튼을 누르고 천천히 말해보세요.');
+        }
+      };
+
+      recognition.onend = () => {
+        resetSpeakButton();
+      };
+    } else {
+      document.getElementById('browserNotice').style.display = 'block';
+    }
+
+    function resetSpeakButton() {
+      isListening = false;
+      const btn = document.getElementById('speakBtn');
+      btn.classList.remove('listening');
+      document.getElementById('speakBtnText').textContent = '따라 말하기';
+      document.getElementById('speakBtnSub').textContent = '누르고 말해요';
+    }
+
+    // 화면 렌더링
+    function renderCard() {
+      const list = curriculum[currentLevel];
+      const item = list[currentIndex];
+      const itemKey = `${currentLevel}-${currentIndex}`;
+
+      document.getElementById('emojiDisplay').textContent = item.emoji;
+      const enEl = document.getElementById('englishText');
+      enEl.textContent = item.en;
+      enEl.className = currentLevel === 1 ? 'english-text sentence-mode' : 'english-text';
+
+      document.getElementById('phoneticHint').textContent = `소리 힌트: ${item.koSound}`;
+      document.getElementById('koreanMeaning').textContent = item.meaning;
+
+      // 진행률 업데이트
+      const pct = ((currentIndex + 1) / list.length) * 100;
+      document.getElementById('progressFill').style.width = `${pct}%`;
+      document.getElementById('progressText').textContent = `${currentIndex + 1} / ${list.length}`;
+
+      // 카드 완료 여부 스타일
+      const flashcard = document.getElementById('flashcard');
+      const nextBtn = document.getElementById('nextBtn');
+      if (completedSet.has(itemKey)) {
+        flashcard.classList.add('correct-card');
+        nextBtn.classList.add('next-highlight');
+      } else {
+        flashcard.classList.remove('correct-card');
+        nextBtn.classList.remove('next-highlight');
+      }
+
+      setFeedback('먼저 🔊 버튼을 눌러 소리를 들어보세요!', '그다음 🎤 버튼을 누르고 큰 소리로 따라 해봐요.');
+    }
+
+    // 단계 변경
+    function selectLevel(level) {
+      currentLevel = level;
+      currentIndex = 0;
+      document.querySelectorAll('.level-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', idx === level);
+      });
+      renderCard();
+      setTimeout(() => speakWord(0.95), 250);
+    }
+
+    // 원어민 발음 듣기 (TTS)
+    function speakWord(rate = 0.95) {
+      if (!('speechSynthesis' in window)) {
+        setFeedback('🔊 음성 재생을 지원하지 않는 브라우저예요.', '');
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const item = curriculum[currentLevel][currentIndex];
+      const utterance = new SpeechSynthesisUtterance(item.en);
+      utterance.lang = 'en-US';
+      utterance.rate = rate;
+      utterance.pitch = 1.1;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // 마이크 듣기 시작
+    function startListening() {
+      if (!recognition) {
+        alert('크롬(Chrome)이나 엣지(Edge) 브라우저에서 실행해주세요!');
+        return;
+      }
+      if (isListening) {
+        recognition.stop();
+        return;
+      }
+      window.speechSynthesis.cancel();
+      try {
+        recognition.start();
+      } catch (e) {
+        recognition.stop();
+      }
+    }
+
+    // 텍스트 정규화 및 유사도 계산
+    function normalize(str) {
+      return str.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+    }
+
+    function similarity(s1, s2) {
+      const a = normalize(s1);
+      const b = normalize(s2);
+      if (a === b) return 1;
+      if (!a || !b) return 0;
+
+      const longer = a.length > b.length ? a : b;
+      const shorter = a.length > b.length ? b : a;
+      const editDist = levenshtein(longer, shorter);
+      return (longer.length - editDist) / longer.length;
+    }
+
+    function levenshtein(a, b) {
+      const matrix = Array.from({ length: b.length + 1 }, (_, i) => [i]);
+      for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+      for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+          if (b[i - 1] === a[j - 1]) {
+            matrix[i][j] = matrix[i - 1][j - 1];
+          } else {
+            matrix[i][j] = Math.min(
+              matrix[i - 1][j - 1] + 1,
+              matrix[i][j - 1] + 1,
+              matrix[i - 1][j] + 1
+            );
+          }
+        }
+      }
+      return matrix[b.length][a.length];
+    }
+
+    // 발음 판정
+    function evaluateSpeech(transcripts) {
+      const target = curriculum[currentLevel][currentIndex].en;
+      let bestScore = 0;
+      let bestHeard = transcripts[0] || '';
+
+      for (const t of transcripts) {
+        const score = similarity(target, t);
+        if (score > bestScore) {
+          bestScore = score;
+          bestHeard = t;
+        }
+      }
+
+      if (bestScore >= 0.65) {
+        handleSuccess(bestHeard);
+      } else if (bestScore >= 0.4) {
+        setFeedback(
+          '👍 거의 다 맞았어요! 한 번만 더 해볼까요?',
+          `들린 소리: "${bestHeard}" → 🐢 느리게 듣기를 눌러보세요!`
+        );
+      } else {
+        setFeedback(
+          '💪 아깝다! 다시 도전해봐요!',
+          `들린 소리: "${bestHeard}" → 소리 힌트를 보고 크게 말해요!`
+        );
+      }
+    }
+
+    function handleSuccess(heardText) {
+      const itemKey = `${currentLevel}-${currentIndex}`;
+      if (!completedSet.has(itemKey)) {
+        completedSet.add(itemKey);
+        stars++;
+        document.getElementById('starCount').textContent = stars;
+      }
+
+      document.getElementById('flashcard').classList.add('correct-card');
+      document.getElementById('nextBtn').classList.add('next-highlight');
+
+      const praises = [
+        '🎉 우와, 원어민처럼 정말 잘했어요!',
+        '🌟 최고예요! 발음이 아주 정확해요!',
+        '👏 짝짝짝! 정말 멋지게 말했어요!'
+      ];
+      const randomPraise = praises[Math.floor(Math.random() * praises.length)];
+      setFeedback(randomPraise, `내가 말한 영어: "${heardText}" (⭐ 획득!)`);
+
+      triggerCelebration();
+      playSuccessSound();
+    }
+
+    function setFeedback(main, sub) {
+      document.getElementById('feedbackMain').textContent = main;
+      document.getElementById('feedbackSub').textContent = sub;
+    }
+
+    function prevItem() {
+      const len = curriculum[currentLevel].length;
+      currentIndex = (currentIndex - 1 + len) % len;
+      renderCard();
+    }
+
+    function nextItem() {
+      const len = curriculum[currentLevel].length;
+      if (currentIndex === len - 1 && currentLevel < curriculum.length - 1) {
+        selectLevel(currentLevel + 1);
+        setFeedback('🎊 2단계 문장 연습 시작!', '1단계에서 배운 단어를 문장 속에서 말해보세요!');
+      } else {
+        currentIndex = (currentIndex + 1) % len;
+        renderCard();
+        setTimeout(() => speakWord(0.95), 200);
+      }
+    }
+
+    function triggerCelebration() {
+      const el = document.getElementById('celebration');
+      el.classList.remove('show');
+      void el.offsetWidth;
+      el.classList.add('show');
+    }
+
+    function playSuccessSound() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.18, ctx.currentTime + i * 0.09);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.09 + 0.25);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + i * 0.09);
+          osc.stop(ctx.currentTime + i * 0.09 + 0.25);
+        });
+      } catch (e) {}
+    }
+
+    renderCard();
+  </script>
+</body>
+</html>
